@@ -28,6 +28,7 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+// let声明语句结构
 type LetStatement struct {
 	Token token.Token // token.LET
 	Name  *Identifier
@@ -40,6 +41,7 @@ func (s *LetStatement) TokenLiteral() string {
 	return s.Token.Literal
 }
 
+// 标识符结构
 type Identifier struct {
 	Token token.Token // token.IDENT
 	Value string
@@ -49,4 +51,16 @@ func (i *Identifier) expressionNode() {}
 
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
+}
+
+// 返回语句结构
+type ReturnStatement struct {
+	Token       token.Token
+	ReturnValue Expression
+}
+
+func (rs *ReturnStatement) statementNode() {}
+
+func (rs *ReturnStatement) TokenLiteral() string {
+	return rs.Token.Literal
 }
