@@ -19,6 +19,7 @@ const (
 	CALL        // myFunction(X)
 )
 
+// 解析器结构
 type Parser struct {
 	l *lexer.Lexer
 
@@ -31,6 +32,7 @@ type Parser struct {
 	infixParseFns  map[token.TokenType]infixParseFn
 }
 
+// 构造函数
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l, errors: []string{}}
 
@@ -45,11 +47,13 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
+// 读取下一个 token
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
 }
 
+// 解析器入口
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
@@ -65,6 +69,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return program
 }
 
+// 解析语句
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
@@ -76,6 +81,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	}
 }
 
+// 解析let语句
 func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: p.curToken}
 
@@ -98,6 +104,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	return stmt
 }
 
+// 解析return语句
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
@@ -111,6 +118,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
+// 解析表达式语句
 func (p *Parser) parserExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
@@ -123,6 +131,7 @@ func (p *Parser) parserExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
+// 解析表达式
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
@@ -133,10 +142,12 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
+// 解析标识符
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
+// 解析整数
 func (p *Parser) parserIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 
@@ -151,14 +162,17 @@ func (p *Parser) parserIntegerLiteral() ast.Expression {
 	return lit
 }
 
+// 判断当前 token 是否为指定类型
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t
 }
 
+// 判断下一个 token 是否为指定类型
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	return p.peekToken.Type == t
 }
 
+// 判断下一个 token 是否为指定类型，并且读取下一个 token
 func (p *Parser) expectPeek(t token.TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
@@ -169,24 +183,30 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 	}
 }
 
+// 获取错误
 func (p *Parser) Errors() []string {
 	return p.errors
 }
 
+// 添加错误
 func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
 type (
+	// 前缀解析函数
 	prefixParseFn func() ast.Expression
-	infixParseFn  func(ast.Expression) ast.Expression
+	// 中缀解析函数
+	infixParseFn func(ast.Expression) ast.Expression
 )
 
+// 注册前缀解析函数
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }
 
+// 注册中缀解析函数
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
