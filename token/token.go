@@ -40,6 +40,8 @@ const (
 	LBRACE = "{"
 	RBRACE = "}"
 
+	STRING = "STRING"
+
 	// 关键字
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
